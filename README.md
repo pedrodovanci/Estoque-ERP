@@ -18,6 +18,42 @@ Seu backend é uma API FastAPI que roda na nuvem. O Supabase fornece o banco Pos
 
 ---
 
+## Integração com o sistema principal (Core)
+
+Quando este módulo estiver hospedado (Railway/Render), o **Core** deve conseguir consumir a API do Estoque de forma confiável.
+
+### Comunicação entre serviços (recomendado)
+
+- **Core → Estoque via HTTP server-to-server**
+- O Core guarda a URL do Estoque em uma env, por exemplo: `ESTOQUE_API_URL=https://seu-estoque...`
+- O Core chama os endpoints do Estoque com timeout e tratamento de falhas
+
+### Autenticação entre módulos
+
+Escolha uma estratégia e aplique em todas as rotas `/estoque/*`:
+
+**Opção A — Service Token (recomendado para integração entre módulos)**
+
+- Core envia: `X-Service-Token: <token>`
+- Estoque valida comparando com `SERVICE_TOKEN` (variável de ambiente no deploy)
+- Opcional: Core envia `X-Usuario-Id` para auditoria básica
+
+**Opção B — JWT do usuário (alinhado com autenticação do Core)**
+
+- Core repassa: `Authorization: Bearer <jwt>`
+- Estoque valida assinatura/claims e extrai `usuario_id` do token
+
+### Observação sobre CORS
+
+- Se o **browser** (Frontend) chamar o Estoque diretamente, CORS precisa liberar a origem do Frontend.
+- Se o **Core** chamar o Estoque (server-to-server), CORS não é relevante.
+
+### Health check
+
+- `GET /health` deve responder `200` e serve para monitoramento no deploy.
+
+---
+
 ## Pré-requisitos
 
 - Python 3.11+ instalado

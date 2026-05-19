@@ -1,0 +1,8 @@
+venv/
+modulo-estoque/venv/
+.env
+modulo-estoque/.env
+__pycache__/
+*.pyc
+.pytest_cache/
+htmlcov/

@@ -53,3 +53,14 @@ def test_saida_diminui_e_nao_deixa_negativo(client):
     resp = client.get("/estoque/produtos/")
     assert resp.status_code == 200, resp.text
     assert resp.json()[0]["saldoAtual"] == 1
+
+
+def test_nao_permite_excluir_produto_com_movimentacao(client):
+    produto = _criar_produto(client, sku="P3", saldo_atual=1)
+    client.post(
+        "/estoque/movimentacoes/entrada",
+        json={"produtoId": produto["id"], "quantidade": 1},
+    )
+
+    resp = client.delete(f"/estoque/produtos/{produto['id']}")
+    assert resp.status_code == 409, resp.text

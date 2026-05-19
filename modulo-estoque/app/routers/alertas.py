@@ -1,12 +1,24 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.models.produto import Produto
 from app.schemas.movimentacao import InventarioCreate, MovimentacaoResponse
 from app.services.estoque_service import registrar_inventario
 
-router = APIRouter(prefix="/estoque", tags=["Alertas"])
+def _require_service_token(x_service_token: str | None = Header(None, alias="X-Service-Token")):
+    if not settings.SERVICE_TOKEN:
+        return
+    if x_service_token != settings.SERVICE_TOKEN:
+        raise HTTPException(status_code=401, detail="Não autorizado")
+
+
+router = APIRouter(
+    prefix="/estoque",
+    tags=["Alertas"],
+    dependencies=[Depends(_require_service_token)],
+)
 
 
 @router.get("/alertas")

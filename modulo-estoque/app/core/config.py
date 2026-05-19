@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     CORE_URL: str = "http://localhost:8000"
     SECRET_KEY: str = "dev"
     FRONTEND_URL: str = "http://localhost:3000"
+    SERVICE_TOKEN: str | None = None
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

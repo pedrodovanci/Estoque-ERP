@@ -62,3 +62,12 @@ def test_filtra_por_sku_e_exclui_produto_sem_movimentacao(client):
     produtos = resp.json()
     assert len(produtos) == 1
     assert produtos[0]["sku"] == "SKU-2"
+
+
+def test_normalize_database_url_com_senha_com_arroba():
+    from app.core.database import normalize_database_url
+
+    raw = "postgresql://postgres:Banco@erp2026@db.pwjpaubkkrqjadciubeh.supabase.co:5432/postgres"
+    normalized = normalize_database_url(raw)
+    assert "postgres:Banco%40erp2026@" in normalized
+    assert "sslmode=require" in normalized

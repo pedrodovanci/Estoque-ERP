@@ -1,26 +1,20 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.core.database import get_db
+from app.core.security import require_core_token
 from app.models.movimentacao import MovimentacaoEstoque
 from app.models.produto import Produto
 from app.schemas.produto import ProdutoCreate, ProdutoResponse, ProdutoUpdate
 
-def _require_service_token(x_service_token: str | None = Header(None, alias="X-Service-Token")):
-    if not settings.SERVICE_TOKEN:
-        return
-    if x_service_token != settings.SERVICE_TOKEN:
-        raise HTTPException(status_code=401, detail="Não autorizado")
-
-
 router = APIRouter(
     prefix="/estoque/produtos",
     tags=["Produtos"],
-    dependencies=[Depends(_require_service_token)],
+    dependencies=[Depends(require_core_token)],
 )
+
 
 
 def _status(produto: Produto) -> str:

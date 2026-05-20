@@ -1,26 +1,20 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.core.database import get_db
+from app.core.security import require_core_token
 from app.models.movimentacao import MovimentacaoEstoque
 from app.schemas.movimentacao import EntradaCreate, MovimentacaoResponse, SaidaCreate
 from app.services.estoque_service import registrar_entrada, registrar_saida
 
-def _require_service_token(x_service_token: str | None = Header(None, alias="X-Service-Token")):
-    if not settings.SERVICE_TOKEN:
-        return
-    if x_service_token != settings.SERVICE_TOKEN:
-        raise HTTPException(status_code=401, detail="Não autorizado")
-
-
 router = APIRouter(
     prefix="/estoque/movimentacoes",
     tags=["Movimentações"],
-    dependencies=[Depends(_require_service_token)],
+    dependencies=[Depends(require_core_token)],
 )
+
 
 
 @router.post("/entrada", response_model=MovimentacaoResponse, status_code=201)
